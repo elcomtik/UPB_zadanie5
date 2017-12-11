@@ -1,18 +1,52 @@
 <?php
 function verify_login(){
     global $db;
-    $sql = $db->query("SELECT id,name,password FROM admins WHERE name='".$_GET['name']."' AND password='".hash("sha512",$_GET['pass'])."' LIMIT 1");
-    $data = $sql->fetch_array();
+
+    $id = "";
+    $name = "";
+
+    //Nahradime
+    //$sql = $db->query("SELECT id,name,password FROM admins WHERE name='".$_GET['name']."' AND password='".hash("sha512",$_GET['pass'])."' LIMIT 1");
+    //$data = $sql->fetch_array();
 
 
-    if(!empty($data)){
-        $_SESSION['id']  = $data['id'];
-        $_SESSION['name'] = $data['name'];
-        $_SESSION['session_id'] = session_id();
-        return true;
-    }else{
-        return false;
+    //Tímto
+    if ($stmt = $db->prepare('SELECT id,name,password FROM admins WHERE name="?" AND password="?" LIMIT 1')) {
+
+        /* bind parameters for markers */
+        $stmt->bind_param("ss", $_GET['name'], hash("sha512",$_GET['pass']));
+
+        /* execute query */
+        $stmt->execute();
+
+        /* bind result variables */
+        $stmt->bind_result($id, $name);
+
+        /* fetch value */
+        $stmt->fetch();
+
+        if(isset($id) && isset($name)){
+            $_SESSION['id']  = $id;
+            $_SESSION['name'] = $name;
+            $_SESSION['session_id'] = session_id();
+            return true;
+        }else{
+            return false;
+        }
+
+        /* close statement */
+        $stmt->close();
     }
+
+//Toto som presunul vyssie
+//    if(!empty($data)){
+//        $_SESSION['id']  = $id;
+//        $_SESSION['name'] = $name;
+//        $_SESSION['session_id'] = session_id();
+//        return true;
+//    }else{
+//        return false;
+//    }
 }
 
 //echo hash("sha512","student");
