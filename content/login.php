@@ -14,7 +14,7 @@ function verify_login(){
     if ($stmt = $db->prepare('SELECT id,name,password FROM admins WHERE name="?" AND password="?" LIMIT 1')) {
 
         /* bind parameters for markers */
-        $stmt->bind_param("ss", $_GET['name'], hash("sha512",$_GET['pass']));
+        $stmt->bind_param("ss", $_POST['name'], hash("sha512",$_POST['pass']));
 
         /* execute query */
         $stmt->execute();
@@ -51,7 +51,7 @@ function verify_login(){
 
 //echo hash("sha512","student");
 
-if(@$_GET['logIN']){
+if(@$_POST['logIN']){ //prerobene na POST
     if(verify_login()) {
         header('LOCATION: index.php');
     }else{
@@ -62,7 +62,7 @@ if(@$_GET['logIN']){
 <?if(!isLogin()){?>
 <div style="width:20%;">
     <?=@$error?>
-    <form method="get" name="login">
+    <form method="post" name="login">
         <label>Meno</label>
         <input name="name" value="" type="text" placeholder="LamaCoder" autofocus />
         <label>Heslo</label>
