@@ -11,17 +11,35 @@ function verify_login(){
         return false;
     }*/
     global $db;
-    $sql = $db->query("SELECT id,name,password FROM admins WHERE name='".$_GET['name']."' AND password='".hash("sha512",$_GET['pass'])."' LIMIT 1");
-    $data = $sql->fetch_array();
+    $id = "";
+    $name = "";
+    if ($stmt = $db->prepare('SELECT id,name,password FROM admins WHERE name="?" AND password="?" LIMIT 1')) {
 
-    if(!empty($data)){
-        $_SESSION['id']  = $data['id'];
-        $_SESSION['name'] = $data['name'];
-        $_SESSION['session_id'] = session_id();
-        return true;
-    }else{
-        return false;
-    }
+        /* bind parameters for markers */
+        $stmt->bind_param("ss", $_POST['name'], hash("sha512",$_POST['pass']));
+
+        /* execute query */
+        $stmt->execute();
+
+
+        /* bind result variables */
+         $stmt->bind_result($id, $name);
+
+        /* fetch value */
+        $stmt->fetch();
+
+        if(isset($id) && isset($name)){
+            $_SESSION['id']  = $id;
+            $_SESSION['name'] = $name;
+            $_SESSION['session_id'] = session_id();
+            return true;
+        }else{
+            return false;
+        }
+
+    /* close statement */
+    $stmt->close();
+
 }
 
 if(@$_GET['logIN']){
@@ -37,7 +55,7 @@ if(@$_GET['logIN']){
 <div style="width:20%;">
     <?=@$error?>
     <form method="get" name="login">
-        //<input type="hidden" name="token" value="<?= $token_value; ?>" />
+        //<input type="hidden" name="token" value="<?php $token_value; ?>" />
         <label>Meno</label>
         <input name="name" value="" type="text" placeholder="LamaCoder" autofocus />
         <label>Heslo</label>
@@ -49,8 +67,6 @@ if(@$_GET['logIN']){
 <?}else{?>
     <div style="width:20%;">
         <?=@$error?>
-        <a href="./?page=logout.php"><button class="button">Odhlásiť sa</butt
-ton></a>
+        <a href="./?page=logout.php"><button class="button">Odhlásiť sa</button></a>
     </div>
 <?}?>
-
