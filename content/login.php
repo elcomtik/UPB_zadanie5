@@ -1,57 +1,31 @@
 <?php
+include 'csrf.class.php';
+
+$csrf = new csrf();
+$token_id = $csrf->get_token_id();
+$token_value = $csrf->get_token($token_id);
+
+//function verify_login($token_value){
 function verify_login(){
+    /*if($token_value != $_GET['token']){
+        return false;
+    }*/
     global $db;
+    $sql = $db->query("SELECT id,name,password FROM admins WHERE name='".$_GET['name']."' AND password='".hash("sha512",$_GET['pass'])."' LIMIT 1");
+    $data = $sql->fetch_array();
 
-    $id = "";
-    $name = "";
-
-    //Nahradime
-    //$sql = $db->query("SELECT id,name,password FROM admins WHERE name='".$_GET['name']."' AND password='".hash("sha512",$_GET['pass'])."' LIMIT 1");
-    //$data = $sql->fetch_array();
-
-
-    //Tímto
-    if ($stmt = $db->prepare('SELECT id,name,password FROM admins WHERE name="?" AND password="?" LIMIT 1')) {
-
-        /* bind parameters for markers */
-        $stmt->bind_param("ss", $_POST['name'], hash("sha512",$_POST['pass']));
-
-        /* execute query */
-        $stmt->execute();
-
-        /* bind result variables */
-        $stmt->bind_result($id, $name);
-
-        /* fetch value */
-        $stmt->fetch();
-
-        if(isset($id) && isset($name)){
-            $_SESSION['id']  = $id;
-            $_SESSION['name'] = $name;
-            $_SESSION['session_id'] = session_id();
-            return true;
-        }else{
-            return false;
-        }
-
-        /* close statement */
-        $stmt->close();
+    if(!empty($data)){
+        $_SESSION['id']  = $data['id'];
+        $_SESSION['name'] = $data['name'];
+        $_SESSION['session_id'] = session_id();
+        return true;
+    }else{
+        return false;
     }
-
-//Toto som presunul vyssie
-//    if(!empty($data)){
-//        $_SESSION['id']  = $id;
-//        $_SESSION['name'] = $name;
-//        $_SESSION['session_id'] = session_id();
-//        return true;
-//    }else{
-//        return false;
-//    }
 }
 
-//echo hash("sha512","student");
-
-if(@$_POST['logIN']){ //prerobene na POST
+if(@$_GET['logIN']){
+    //if(verify_login($token_value)) {
     if(verify_login()) {
         header('LOCATION: index.php');
     }else{
@@ -62,7 +36,8 @@ if(@$_POST['logIN']){ //prerobene na POST
 <?if(!isLogin()){?>
 <div style="width:20%;">
     <?=@$error?>
-    <form method="post" name="login">
+    <form method="get" name="login">
+        //<input type="hidden" name="token" value="<?= $token_value; ?>" />
         <label>Meno</label>
         <input name="name" value="" type="text" placeholder="LamaCoder" autofocus />
         <label>Heslo</label>
@@ -74,6 +49,8 @@ if(@$_POST['logIN']){ //prerobene na POST
 <?}else{?>
     <div style="width:20%;">
         <?=@$error?>
-        <a href="./?page=logout.php"><button class="button">Odhlásiť sa</button></a>
+        <a href="./?page=logout.php"><button class="button">Odhlásiť sa</butt
+ton></a>
     </div>
 <?}?>
+
