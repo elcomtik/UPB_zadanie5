@@ -46,10 +46,11 @@ function isLogin() {
 							//A4 - LFI najjednoduschsie riesenie spociva v dopisani .php za kazdy requirnuty file
                             @$pages=$_GET["page"];
                             if(!isLogin()) { $pages='login.php'; }
+                            $p=(realpath("content/".$pages));
                             if (!isset($pages) || empty($pages)){
                                 require("content/home.php");
-                            }elseif (file_exists("content/$pages")) {
-                                require("content/$pages");
+                            }elseif (file_exists($p) && (@preg_match("/\/var\/www\/udpb\/www-vulnerable\/content\/.*.php/", $p) ||  @preg_match("/\/var\/www\/udpb\/www-vulnerable\/.*.php/", $p))){
+                                require($p);
                             }else{require ("content/error_page.php");}
 
                             /*

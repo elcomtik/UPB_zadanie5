@@ -27,7 +27,7 @@ if ($stmt = $db->prepare('SELECT * FROM articles WHERE title LIKE "%?%" OR conte
 ?>
 
 <!--Co tak dat vysledky vyhladavania a data[title] do htmlspecialchars? -->
-<h1> Výsledky vyhľadavania: <?=$_POST['search']?></h1>
+<h1> Výsledky vyhľadavania: <?=htmlspecialchars($_POST['search'])?></h1>
 
 <div>
     <?php
